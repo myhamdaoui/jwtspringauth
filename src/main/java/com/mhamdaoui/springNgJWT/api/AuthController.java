@@ -3,6 +3,7 @@ package com.mhamdaoui.springNgJWT.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,11 +34,18 @@ public class AuthController {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
-	@GetMapping("/")
+	@GetMapping("/admin")
 	public String welcome() {
 		System.out.println(SecurityContextHolder.getContext().getAuthentication());
 		
 		return "Welcome to Novelis";
+	}
+	
+	@GetMapping("/")
+	public String index() {
+		System.out.println(SecurityContextHolder.getContext().getAuthentication());
+		
+		return "Welcome to home page";
 	}
 	
 	@PostMapping("/register")

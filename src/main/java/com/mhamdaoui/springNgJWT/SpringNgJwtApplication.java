@@ -21,9 +21,9 @@ public class SpringNgJwtApplication {
 	
 	@PostConstruct
 	public void usersSeeder() {
-		userRepository.save(new User(null, "hamdaoui", passwordEncoder.encode("1234"), "sadasds@gmail.com"));
-		userRepository.save(new User(null, "anas", passwordEncoder.encode("1234"), "sadasds@gmail.com"));
-		userRepository.save(new User(null, "ahmed", passwordEncoder.encode("1234"), "sadasds@gmail.com"));
+		userRepository.save(new User(null, "hamdaoui", passwordEncoder.encode("1234"), "sadasds@gmail.com", "ROLE_ADMIN", "CRUD,APPROVE"));
+		userRepository.save(new User(null, "anas", passwordEncoder.encode("1234"), "sadasds@gmail.com", "ROLE_BA", "CRUD"));
+		userRepository.save(new User(null, "ahmed", passwordEncoder.encode("1234"), "sadasds@gmail.com", "ROLE_BA", "CRUD"));
 	}
 
 	public static void main(String[] args) {
