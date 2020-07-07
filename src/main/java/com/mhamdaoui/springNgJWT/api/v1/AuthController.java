@@ -1,9 +1,10 @@
-package com.mhamdaoui.springNgJWT.api;
+package com.mhamdaoui.springNgJWT.api.v1;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,9 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mhamdaoui.springNgJWT.dao.RoleRepository;
 import com.mhamdaoui.springNgJWT.dao.UserRepository;
 import com.mhamdaoui.springNgJWT.dto.AuthRequest;
+import com.mhamdaoui.springNgJWT.dto.AuthResponse;
+import com.mhamdaoui.springNgJWT.dto.ErrorDto;
 import com.mhamdaoui.springNgJWT.dto.RegisterRequest;
+import com.mhamdaoui.springNgJWT.dto.RegisterResponse;
+import com.mhamdaoui.springNgJWT.model.Role;
 import com.mhamdaoui.springNgJWT.model.User;
 import com.mhamdaoui.springNgJWT.util.JwtUtil;
 
@@ -34,44 +40,56 @@ public class AuthController {
 	private UserRepository userRepository;
 	
 	@Autowired
+	private RoleRepository roleRepository;
+	
+	@Autowired
 	private AuthenticationManager authenticationManager;
 	
 	@GetMapping("/admin")
 	public String welcome() {
 		System.out.println(SecurityContextHolder.getContext().getAuthentication());
 		
-		return "Welcome to Novelis";
+		return "Admin page";
 	}
 	
-	@GetMapping("/")
+	@GetMapping("/processes")
 	public String index() {
 		System.out.println(SecurityContextHolder.getContext().getAuthentication());
 		
-		return "Welcome to home page";
+		return "BA & Admin page";
 	}
 	
 	@PostMapping("/register")
-	public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
+	public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
 		User user = new User();
+
+		System.out.println(registerRequest);
+		
+		// Find userRole by name (ROLE_ADMIN OR ROLE_BA)
+		Role userRole = roleRepository.findByName(registerRequest.getRole());
+		
 		user.setUsername(registerRequest.getUsername());
 		user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 		user.setEmail(registerRequest.getEmail());
+		user.setRole(userRole);
+		user.setPermissions(registerRequest.getPermissions());
 		
 		userRepository.save(user);
 		
-		return new ResponseEntity("SIGNUP_SUCCESS", HttpStatus.OK);
+		return ResponseEntity.ok(new RegisterResponse("SIGNUP_SUCCESS"));
 	}
 	
 	@PostMapping("/auth")
-	public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
-		try {
-			authenticationManager.authenticate(
+	public ResponseEntity<?> auth(@Valid @RequestBody AuthRequest authRequest) throws Exception {
+		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
-			);
-		} catch(Exception ex) {
-			throw new Exception("Invalid username/password");
-		}
+		);
 		
-		return jwtUtil.generateToken(authRequest.getUsername());
+		String token = jwtUtil.generateToken(authRequest.getUsername());
+		
+		AuthResponse response = new AuthResponse();
+		response.setToken(token);
+		
+		return ResponseEntity.ok(response);
 	}
 }

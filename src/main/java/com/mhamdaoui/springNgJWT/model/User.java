@@ -12,7 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -30,30 +31,24 @@ public class User {
 	private Long id;
 	
 	@Column
-	@NotBlank
-	@Size(max = 60)
+	@NotNull
+	@Size(min = 3, max = 20, message = "username should contains 3 to 20 characters")
 	private String username;
 	
 	@Column
-	@NotBlank
-	@Size(max = 60)
+	@NotNull
 	private String password;
 	
 	@Column
-	@NotBlank
-	@Size(max = 60)
+	@NotNull
+	@Email
 	private String email;
 	
-    private String roles = "";
+	@ManyToOne()
+	@JoinColumn(name="role_id")
+    private Role role;
 
-    private String permissions = "";
-    
-    public List<String> getRoleList(){
-        if(this.roles.length() > 0){
-            return Arrays.asList(this.roles.split(","));
-        }
-        return new ArrayList<>();
-    }
+    private String permissions;
 
     public List<String> getPermissionList(){
         if(this.permissions.length() > 0){
